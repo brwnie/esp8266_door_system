@@ -1,0 +1,245 @@
+<html>
+  <head>
+    <!-- Latest compiled and minified CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+    
+    <!-- Latest compiled and minified JavaScript -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.min.js" integrity="sha384-cVKIPhGWiC2Al4u+LWgxfKTRIcfu0JTxR+EQDz/bgldoEyl4H0zUF0QKbrJ0EcQF" crossorigin="anonymous"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Door Management System</title>
+
+    
+  </head>
+  <body>
+    <div class="container text-center">
+      <div class="header clearfix">
+       <h3>Garage Door System</h3>
+      </div>
+      <div class="jumbotron">
+        <p class="lead">Select an option...</p>
+        <div class="alert alert-success collapse" id="statusSuccessAlert" role="alert">
+          Door is currently closed
+        </div>
+        <div class="alert alert-danger collapse" id="statusDangerAlert" role="alert">
+          Communication error occured
+        </div>    
+        <div class="alert alert-info" id="statusInfoAlert" role="alert">
+          Click a button to continue...
+        </div>
+       
+        <div class="d-grid gap-2"><a class="btn btn-primary" role="button" onmousedown='statusDoorGet()'>Door Status</a></div>
+        
+        <hr />
+        <div class="btn-group-vertial ml-4 mt-4" role="group">
+          <div class="btn-group">
+              <input type="password" readonly class="text-center form-control-lg mb-2" id="display">
+            </div>
+            <br>
+          <div class="btn-group">
+            <button type="button" class="btn btn-outline-secondary btn-lg" onmousedown='addNumber(1)'>1</button>
+            <button type="button" class="btn btn-outline-secondary btn-lg" onmousedown='addNumber(2)'>2</button>
+            <button type="button" class="btn btn-outline-secondary btn-lg" onmousedown='addNumber(3)'>3</button>
+          </div>
+            <br>
+          <div class="btn-group">
+            <button type="button" class="btn btn-outline-secondary btn-lg" onmousedown='addNumber(4)'>4</button>
+            <button type="button" class="btn btn-outline-secondary btn-lg" onmousedown='addNumber(5)'>5</button>
+            <button type="button" class="btn btn-outline-secondary btn-lg" onmousedown='addNumber(6)'>6</button>
+          </div>
+            <br>
+          <div class="btn-group">
+            <button type="button" class="btn btn-outline-secondary btn-lg" onmousedown='addNumber(7)'>7</button>
+            <button type="button" class="btn btn-outline-secondary btn-lg" onmousedown='addNumber(8)'>8</button>
+            <button type="button" class="btn btn-outline-secondary btn-lg" onmousedown='addNumber(9)'>9</button>
+          </div>
+            <br>
+          <div class="btn-group">
+            <button type="button" class="btn btn-outline-danger btn-lg" onmousedown='delNumber()'>x</button>
+            <button type="button" class="btn btn-outline-secondary btn-lg" onmousedown='addNumber(0)'>0</button>
+            <button type="button" class="btn btn-outline-success btn-lg" onmousedown='submitNumber()'>o</button>
+          </div>
+        </div>
+        <hr />
+
+        <div class="d-grid gap-2"><a class="btn btn-success" role="button" onmousedown='openDoorGet()'>Open Door</a>
+        <a class="btn btn-danger" role="button" onmousedown='closeDoorGet()'>Close Door</a></div>
+        </div>
+
+      <footer class="footer">Version: v0.0.1-alpha (2022)</footer>
+      <footer class="footer" id="uptime-footer"></footer>
+      </div>
+      <script> 
+
+        $(document).ready(function(){
+          $.ajax({
+            url: "/uptime/",
+            type: "GET",
+            datatype: "text",
+            success: function(data) {
+              $('#uptime-footer').text('Uptime: ' + data);
+            },
+            timeout: 1000
+          });
+        })
+
+        function addNumber(num) {
+           const textbox = document.getElementById('display')
+          if(textbox.value.length < "4") {
+            document.getElementById('display').value=document.getElementById('display').value + num;
+            }
+        }
+        
+        function delNumber(num) {
+          document.getElementById('display').value="";
+        }
+        
+        function submitNumber(num) {
+          
+        }
+          
+        function hideBoxes() {
+          $('#statusInfoAlert').hide();
+          $('#statusDangerAlert').hide();
+          $('#statusSuccessAlert').hide();
+        }
+        
+        function openDoorResult(result) {
+          console.log(result.query);
+          console.log(result.reason);
+          hideBoxes();
+          if(result.reason == "opening") {
+          $('#statusSuccessAlert').text("The door is opening");
+          $('#statusSuccessAlert').fadeIn();
+          } else if(result.reason == "invalid") {
+          $('#statusDangerAlert').text("The door is already open!");
+		  $('#statusDangerAlert').fadeIn();
+          } else if(result.reason == "ratelimited") {
+          $('#statusDangerAlert').text("The system is busy!");  
+		  $('#statusDangerAlert').fadeIn();
+          }  else if(result.reason == "invalid-pin") {
+		  $('#statusDangerAlert').text("Invalid PIN entered");    
+          $('#statusDangerAlert').fadeIn();
+		  } else {
+          $('#statusDangerAlert').text("An unknown error occured");    
+          $('#statusDangerAlert').fadeIn();            
+          }
+        }
+		
+
+        function closeDoorResult(result) {
+          console.log(result.query);
+          console.log(result.reason);
+          hideBoxes();
+          if(result.reason == "closing") {
+          $('#statusSuccessAlert').text("The door is now closing");
+          $('#statusSuccessAlert').fadeIn();
+          } else if(result.reason == "invalid") {
+          $('#statusDangerAlert').text("The door is already closed!");
+		  $('#statusDangerAlert').fadeIn();
+          } else if(result.reason == "ratelimited") {
+          $('#statusDangerAlert').text("The system is busy!");  
+		  $('#statusDangerAlert').fadeIn();
+          } else if(result.reason == "invalid-pin") {
+		  $('#statusDangerAlert').text("Invalid PIN entered");    
+          $('#statusDangerAlert').fadeIn();
+		  } else {
+          $('#statusDangerAlert').text("An unknown error occured");    
+          $('#statusDangerAlert').fadeIn();            
+          }
+        }
+		
+
+        function statusDoorResult(result) {
+          console.log(result.query);
+          console.log(result.reason);
+          hideBoxes();
+          if(result.reason == "open") {
+          $('#statusInfoAlert').text("The door is open");
+          $('#statusInfoAlert').fadeIn();
+          } else if(result.reason == "closed") {
+          $('#statusInfoAlert').text("The door is closed");
+          $('#statusInfoAlert').fadeIn();
+          } else if(result.reason == "ratelimited") {
+          $('#statusDangerAlert').text("The system is busy!");    
+          $('#statusDangerAlert').fadeIn();
+          } else if(result.reason == "invalid-pin") {
+		  $('#statusDangerAlert').text("Invalid PIN entered");    
+          $('#statusDangerAlert').fadeIn();
+		  } else {
+          $('#statusDangerAlert').text("An unknown error occured");    
+          $('#statusDangerAlert').fadeIn();            
+          }
+        }
+
+        function commsError() {
+          hideBoxes();
+          $('#statusDangerAlert').text("Communications error has occured");
+          $('#statusDangerAlert').fadeIn();
+        }
+
+        
+        function openDoorGet() {
+			var post_values = { pin : document.getElementById('display').value };
+          $.ajax({
+            url: "/open/",
+            type: "POST",
+            datatype: "json",
+			data: JSON.stringify(post_values),
+            success: function(data) {
+              openDoorResult(data);
+            },
+            fail: function() {
+              commsError();
+            },
+            error: function() {
+              commsError();
+            },
+            timeout: 3000
+          });
+        }
+
+        function closeDoorGet() {
+			var post_values = { pin : document.getElementById('display').value };
+          $.ajax({
+            url: "/close/",
+            type: "POST",
+            datatype: "json",
+			data: JSON.stringify(post_values),
+            success: function(data) {
+              closeDoorResult(data);
+            },
+            fail: function() {
+              commsError();
+            },
+            error: function() {
+              commsError();
+            },
+            timeout: 3000
+          });
+        }
+
+        
+        function statusDoorGet() {
+          $.ajax({
+            url: "/status/",
+            type: "GET",
+            datatype: "json",
+            success: function(data) {
+              statusDoorResult(data);
+            },
+            fail: function() {
+              commsError();
+            },
+            error: function() {
+              commsError();
+            },
+            timeout: 3000
+          });
+        }
+       
+              
+      </script>
+  </body>
+</html>

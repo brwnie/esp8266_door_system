@@ -1,0 +1,5 @@
+{
+	"ssid" : "NetworkName",
+	"key" : "NetworkKey",
+	"pin" : 1234
+}
